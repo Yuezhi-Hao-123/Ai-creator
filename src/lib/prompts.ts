@@ -2,7 +2,7 @@ import type { CreatorProfile, TopicIdea, VideoMetrics } from "./types";
 
 /**
  * PromptBuilder — builds structured prompts for each AI task.
- * Auto-detects Chinese input and switches AI output language.
+ * Language priority: Profile > auto-detect from input > English.
  */
 
 interface ChatMessage {
@@ -10,13 +10,37 @@ interface ChatMessage {
   content: string;
 }
 
+/** Check if profile language setting indicates Chinese */
+function profileIsChinese(profile?: CreatorProfile | null): boolean {
+  if (!profile?.language) return false;
+  const lang = profile.language.toLowerCase();
+  return /中文|chinese|zh|mandarin|cantonese/.test(lang);
+}
+
 /** Detect if text contains Chinese characters */
 function isChinese(text: string): boolean {
   return /[一-鿿]/.test(text);
 }
 
-/** Get language instruction based on input language */
-function langHint(input: string): { systemHint: string; outputLang: string } {
+/** Determine output language: profile first, then auto-detect, then English */
+function getOutputLang(
+  input: string,
+  profile?: CreatorProfile | null
+): { systemHint: string; outputLang: string } {
+  if (profileIsChinese(profile)) {
+    return {
+      systemHint: "Reply in Chinese (Simplified). 用简体中文回复。",
+      outputLang: "Chinese, output all content in Simplified Chinese",
+    };
+  }
+  // Also check if profile.language explicitly says English
+  if (profile?.language && /english|英文/.test(profile.language.toLowerCase())) {
+    return {
+      systemHint: "Reply in English.",
+      outputLang: "English",
+    };
+  }
+  // Fallback: auto-detect from input text
   if (isChinese(input)) {
     return {
       systemHint: "Reply in Chinese (Simplified). 用简体中文回复。",
@@ -35,7 +59,7 @@ export function buildTopicPrompt(
   topic: string,
   profile?: CreatorProfile | null
 ): ChatMessage[] {
-  const { systemHint, outputLang } = langHint(topic);
+  const { systemHint, outputLang } = getOutputLang(topic, profile);
 
   const contextParts: string[] = [];
   if (profile) {
@@ -82,8 +106,7 @@ export function buildPlanPrompt(
   selectedTopic: TopicIdea,
   profile?: CreatorProfile | null
 ): ChatMessage[] {
-  // Detect language from the selected topic's title
-  const { systemHint, outputLang } = langHint(selectedTopic.title);
+  const { systemHint, outputLang } = getOutputLang(selectedTopic.title, profile);
 
   const contextParts: string[] = [];
   if (profile) {
@@ -139,10 +162,7 @@ export function buildAnalysisPrompt(
   profile?: CreatorProfile | null,
   videoTopic?: string
 ): ChatMessage[] {
-  // Detect language from optional video topic, default to English for numbers
-  const { systemHint, outputLang } = videoTopic
-    ? langHint(videoTopic)
-    : { systemHint: "Reply in English.", outputLang: "English" };
+  const { systemHint, outputLang } = getOutputLang(videoTopic || "", profile);
 
   const contextParts: string[] = [];
   if (profile) {

@@ -3,6 +3,7 @@ import { buildAnalysisPrompt } from "@/lib/prompts";
 import { callDeepSeek } from "@/lib/ai-client";
 import { parseJSONResponse } from "@/lib/result-parser";
 import { calculateEngagement } from "@/lib/metrics";
+import { createClient } from "@supabase/supabase-js";
 import { AnalysisResultSchema, VideoMetricsSchema } from "@/lib/types";
 
 /**
@@ -17,6 +18,7 @@ export async function POST(request: NextRequest) {
       video_topic?: string;
       profile_id?: string;
       model?: string;
+      device_id?: string;
     };
 
     // Validate metrics
@@ -55,12 +57,29 @@ export async function POST(request: NextRequest) {
     // Calculate engagement
     const engagement = calculateEngagement(metrics);
 
+    // Load creator profile if device_id provided
+    let profile = null;
+    if (body.device_id) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .eq("device_id", body.device_id)
+          .maybeSingle();
+        profile = data;
+      } catch { /* ignore */ }
+    }
+
     // Build prompt
     const messages = buildAnalysisPrompt(
       metrics,
       engagement.rate,
       engagement.level,
-      null, // profile not loaded yet — reserved for future
+      profile,
       body.video_topic
     );
 
