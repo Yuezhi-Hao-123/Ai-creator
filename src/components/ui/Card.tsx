@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 /**
  * Card — white rounded container with shadow.
@@ -9,6 +9,7 @@ interface CardProps {
   hover?: boolean;
   className?: string;
   onClick?: () => void;
+  style?: CSSProperties;
 }
 
 export default function Card({
@@ -16,10 +17,12 @@ export default function Card({
   hover = true,
   className = "",
   onClick,
+  style,
 }: CardProps) {
   return (
     <div
       onClick={onClick}
+      style={style}
       className={[
         "bg-[var(--color-surface)] rounded-[var(--radius-card)] p-5 shadow-[var(--shadow-card)] border border-[var(--color-border)]",
         hover
