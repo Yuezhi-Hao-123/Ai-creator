@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import PlanResult from "@/components/plan/PlanResult";
 import EmptyState from "@/components/ui/EmptyState";
 import { TopicCardSkeleton } from "@/components/ui/Skeleton";
@@ -25,24 +25,8 @@ export default function PlanPage() {
   const [manualAngle, setManualAngle] = useState("");
   const [manualDesc, setManualDesc] = useState("");
 
-  // Load topic from localStorage on mount
-  useEffect(() => {
-    try {
-      const stored = localStorage.getItem("selected_topic");
-      if (stored) {
-        const parsed = JSON.parse(stored) as TopicIdea;
-        setTopic(parsed);
-        // Auto-generate plan
-        generatePlan(parsed);
-        // Clear after reading
-        localStorage.removeItem("selected_topic");
-      }
-    } catch {
-      // Invalid stored data — ignore
-    }
-  }, []);
-
-  const generatePlan = async (idea: TopicIdea) => {
+  // Define generatePlan before the effect that calls it
+  const generatePlan = useCallback(async (idea: TopicIdea) => {
     setLoading(true);
     setError(null);
     setResult(null);
@@ -68,7 +52,23 @@ export default function PlanPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Load topic from localStorage on mount and auto-generate
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("selected_topic");
+      if (stored) {
+        const parsed = JSON.parse(stored) as TopicIdea;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from external source
+        setTopic(parsed);
+        generatePlan(parsed);
+        localStorage.removeItem("selected_topic");
+      }
+    } catch {
+      // Invalid stored data — ignore
+    }
+  }, [generatePlan]);
 
   const handleManualGenerate = () => {
     if (!manualTitle.trim() || !manualAngle.trim()) return;

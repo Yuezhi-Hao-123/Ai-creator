@@ -56,9 +56,10 @@ export default function ProfileForm() {
   const [videoDuration, setVideoDuration] = useState("");
   const [language, setLanguage] = useState("English");
 
-  // Init device ID and load existing profile
+  // Init device ID and load existing profile on mount
   useEffect(() => {
     const id = getDeviceId();
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time init from external source (localStorage)
     setDeviceId(id);
 
     getProfile(id)

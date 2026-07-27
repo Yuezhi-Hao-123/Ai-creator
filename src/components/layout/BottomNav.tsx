@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import strings from "@/strings/en";
 
 /**
  * BottomNav — mobile bottom tab bar (visible only on < md screens).
