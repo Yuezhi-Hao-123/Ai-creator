@@ -21,11 +21,13 @@ export default function TopicsPage() {
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TopicGenerationResult | null>(null);
   const [profilePlatform, setProfilePlatform] = useState<string | null>(null);
+  const [deviceId, setDeviceId] = useState<string>("");
 
-  // Load profile for context display
+  // Load profile + device ID for context display and AI personalization
   useEffect(() => {
     try {
       const id = getDeviceId();
+      setDeviceId(id);
       getProfile(id).then((p) => {
         if (p) setProfilePlatform(p.platform);
       });
@@ -43,7 +45,7 @@ export default function TopicsPage() {
       const response = await fetch("/api/topics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic }),
+        body: JSON.stringify({ topic, device_id: deviceId }),
       });
 
       const data = await response.json();

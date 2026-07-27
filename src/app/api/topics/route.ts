@@ -3,17 +3,18 @@ import { buildTopicPrompt } from "@/lib/prompts";
 import { callDeepSeek } from "@/lib/ai-client";
 import { parseJSONResponse } from "@/lib/result-parser";
 import { TopicGenerationResultSchema } from "@/lib/types";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * POST /api/topics
- * Body: { topic: string, profile_id?: string }
- * Returns: { ideas: TopicIdea[] }
+ * Body: { topic: string, device_id?: string }
+ * Loads creator profile for the device and injects into AI prompt.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       topic?: string;
-      profile_id?: string;
+      device_id?: string;
     };
 
     // Validate
@@ -31,8 +32,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build prompt (profile_id is reserved for future use)
-    const messages = buildTopicPrompt(body.topic.trim());
+    // Load creator profile if device_id provided
+    let profile = null;
+    if (body.device_id) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .eq("device_id", body.device_id)
+          .maybeSingle();
+        profile = data;
+      } catch {
+        // Profile not available — continue without it
+      }
+    }
+
+    // Build prompt with profile context
+    const messages = buildTopicPrompt(body.topic.trim(), profile);
 
     // Call AI
     const raw = await callDeepSeek(messages);
@@ -47,7 +67,6 @@ export async function POST(request: NextRequest) {
     const message =
       err instanceof Error ? err.message : "An unexpected error occurred.";
 
-    // Determine appropriate status code
     const status = message.includes("not configured")
       ? 500
       : message.includes("invalid")

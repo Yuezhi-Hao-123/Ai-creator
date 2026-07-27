@@ -3,17 +3,18 @@ import { buildPlanPrompt } from "@/lib/prompts";
 import { callDeepSeek } from "@/lib/ai-client";
 import { parseJSONResponse } from "@/lib/result-parser";
 import { ContentPlanResultSchema, TopicIdeaSchema } from "@/lib/types";
+import { createClient } from "@supabase/supabase-js";
 
 /**
  * POST /api/plan
- * Body: { selected_topic: TopicIdea, profile_id?: string }
- * Returns: ContentPlanResult
+ * Body: { selected_topic: TopicIdea, device_id?: string }
+ * Loads creator profile and injects into AI prompt.
  */
 export async function POST(request: NextRequest) {
   try {
     const body = (await request.json()) as {
       selected_topic?: unknown;
-      profile_id?: string;
+      device_id?: string;
     };
 
     // Validate selected_topic
@@ -32,8 +33,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Build prompt
-    const messages = buildPlanPrompt(topicResult.data);
+    // Load creator profile if device_id provided
+    let profile = null;
+    if (body.device_id) {
+      try {
+        const supabase = createClient(
+          process.env.NEXT_PUBLIC_SUPABASE_URL!,
+          process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+        );
+        const { data } = await supabase
+          .from("creator_profiles")
+          .select("*")
+          .eq("device_id", body.device_id)
+          .maybeSingle();
+        profile = data;
+      } catch {
+        // Profile not available — continue without it
+      }
+    }
+
+    // Build prompt with profile context
+    const messages = buildPlanPrompt(topicResult.data, profile);
 
     // Call AI
     const raw = await callDeepSeek(messages);

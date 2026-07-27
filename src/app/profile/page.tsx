@@ -1,8 +1,10 @@
+import Link from "next/link";
 import ProfileForm from "@/components/profile/ProfileForm";
 import strings from "@/strings/en";
 
 /**
  * Creator Profile page — full form with Supabase integration.
+ * Includes a shortcut to generate topics with the saved profile.
  */
 export default function ProfilePage() {
   return (
@@ -15,6 +17,16 @@ export default function ProfilePage() {
       </p>
 
       <ProfileForm />
+
+      {/* Quick action: jump to Topic Ideas */}
+      <div className="mt-8 flex justify-end">
+        <Link
+          href="/topics"
+          className="inline-flex items-center gap-2 rounded-[var(--radius-button)] bg-[var(--color-primary)] px-5 py-2.5 text-sm font-medium text-white hover:bg-[var(--color-primary-dark)] transition-colors no-underline shadow-sm"
+        >
+          💡 Generate Topics →
+        </Link>
+      </div>
     </div>
   );
 }
