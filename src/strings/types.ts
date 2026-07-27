@@ -75,7 +75,12 @@ export interface Strings {
       comments: string;
       saves: string;
       shares: string;
+      retention3s: string;
+      retention5s: string;
+      completionRate: string;
+      coverClickRate: string;
     };
+    advancedMetrics: string;
     videoTopic: string;
     videoTopicPlaceholder: string;
     analyzeButton: string;

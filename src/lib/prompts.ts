@@ -177,6 +177,16 @@ export function buildAnalysisPrompt(
 
   const topicLine = videoTopic ? `\nVideo topic: "${videoTopic}"` : "";
 
+  // Advanced metrics (if provided)
+  const advancedLines: string[] = [];
+  if (metrics.retention_3s !== undefined) advancedLines.push(`3s retention: ${metrics.retention_3s}%`);
+  if (metrics.retention_5s !== undefined) advancedLines.push(`5s retention: ${metrics.retention_5s}%`);
+  if (metrics.completion_rate !== undefined) advancedLines.push(`Completion rate: ${metrics.completion_rate}%`);
+  if (metrics.cover_click_rate !== undefined) advancedLines.push(`Cover click rate: ${metrics.cover_click_rate}%`);
+  const advancedBlock = advancedLines.length
+    ? `\n\nAdvanced metrics:\n${advancedLines.join("\n")}`
+    : "";
+
   return [
     {
       role: "system",
@@ -194,9 +204,9 @@ Saves: ${metrics.saves}
 Shares: ${metrics.shares}
 
 Calculated engagement rate: ${engagementRate.toFixed(2)}%
-Engagement level: ${engagementLevel}${topicLine}${contextBlock}
+Engagement level: ${engagementLevel}${advancedBlock}${topicLine}${contextBlock}
 
-Based on these numbers, provide 3-5 specific, actionable suggestions (in ${outputLang}) to improve future content performance. Focus on what the creator can change: hooks, pacing, visuals, storytelling, audience targeting, format adjustments.
+Based on these numbers, provide 3-5 specific, actionable suggestions (in ${outputLang}) to improve future content performance. Focus on what the creator can change: hooks, pacing, visuals, storytelling, audience targeting, format adjustments.${advancedLines.length ? " Pay special attention to the advanced retention and click rate metrics." : ""}
 
 Output as JSON:
 {

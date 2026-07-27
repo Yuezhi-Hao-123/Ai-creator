@@ -98,6 +98,11 @@ export const VideoMetricsSchema = z.object({
   comments: z.number().int().nonnegative(),
   saves: z.number().int().nonnegative(),
   shares: z.number().int().nonnegative(),
+  // Advanced metrics (optional)
+  retention_3s: z.number().min(0).max(100).optional(),
+  retention_5s: z.number().min(0).max(100).optional(),
+  completion_rate: z.number().min(0).max(100).optional(),
+  cover_click_rate: z.number().min(0).max(100).optional(),
 });
 export type VideoMetrics = z.infer<typeof VideoMetricsSchema>;
 

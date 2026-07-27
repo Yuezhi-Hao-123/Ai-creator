@@ -29,13 +29,27 @@ export function validateMetrics(
   if (metrics.saves < 0) errors.push("Saves cannot be negative.");
   if (metrics.shares < 0) errors.push("Shares cannot be negative.");
 
+  // Optional advanced metrics range check
+  if (metrics.retention_3s !== undefined && (metrics.retention_3s < 0 || metrics.retention_3s > 100))
+    errors.push("3s retention must be 0–100.");
+  if (metrics.retention_5s !== undefined && (metrics.retention_5s < 0 || metrics.retention_5s > 100))
+    errors.push("5s retention must be 0–100.");
+  if (metrics.completion_rate !== undefined && (metrics.completion_rate < 0 || metrics.completion_rate > 100))
+    errors.push("Completion rate must be 0–100.");
+  if (metrics.cover_click_rate !== undefined && (metrics.cover_click_rate < 0 || metrics.cover_click_rate > 100))
+    errors.push("Cover click rate must be 0–100.");
+
   const nonZeroFields = [
     metrics.views,
     metrics.likes,
     metrics.comments,
     metrics.saves,
     metrics.shares,
-  ].filter((v) => v > 0);
+    metrics.retention_3s,
+    metrics.retention_5s,
+    metrics.completion_rate,
+    metrics.cover_click_rate,
+  ].filter((v) => v !== undefined && v > 0);
 
   if (nonZeroFields.length === 0) {
     errors.push("At least one metric must be greater than zero.");
