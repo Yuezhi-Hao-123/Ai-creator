@@ -63,7 +63,7 @@ export interface Strings {
       coverText: string;
     };
     copyAll: string;
-    downloadMd: string;
+    downloadWord: string;
     copySuccess: string;
   };
   analyze: {

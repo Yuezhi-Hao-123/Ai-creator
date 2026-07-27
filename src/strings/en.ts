@@ -103,7 +103,7 @@ const strings = {
       coverText: "Cover Text",
     },
     copyAll: "Copy All",
-    downloadMd: "Download .md",
+    downloadWord: "Download Word",
     copySuccess: "Content copied to clipboard",
   },
 

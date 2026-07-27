@@ -96,7 +96,7 @@ const zh = {
       coverText: "封面文字",
     },
     copyAll: "复制全部",
-    downloadMd: "下载 .md",
+    downloadWord: "下载 Word",
     copySuccess: "内容已复制到剪贴板",
   },
 
