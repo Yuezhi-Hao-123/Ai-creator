@@ -3,18 +3,15 @@
 import { useState } from "react";
 import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
-import strings from "@/strings/en";
+import { useStrings } from "@/lib/i18n";
 
-/**
- * TopicInput — search-bar style input + Generate button.
- * Controlled component; fires onGenerate when user clicks or presses Enter.
- */
 interface TopicInputProps {
   onGenerate: (topic: string) => void;
   loading: boolean;
 }
 
 export default function TopicInput({ onGenerate, loading }: TopicInputProps) {
+  const strings = useStrings();
   const [value, setValue] = useState("");
 
   const handleSubmit = () => {
@@ -30,18 +27,11 @@ export default function TopicInput({ onGenerate, loading }: TopicInputProps) {
           placeholder={strings.topics.inputPlaceholder}
           value={value}
           onChange={(e) => setValue(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") handleSubmit();
-          }}
+          onKeyDown={(e) => { if (e.key === "Enter") handleSubmit(); }}
           disabled={loading}
         />
       </div>
-      <Button
-        onClick={handleSubmit}
-        loading={loading}
-        disabled={!value.trim() || loading}
-        size="lg"
-      >
+      <Button onClick={handleSubmit} loading={loading} disabled={!value.trim() || loading} size="lg">
         {loading ? strings.topics.generating : strings.topics.generateButton}
       </Button>
     </div>

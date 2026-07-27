@@ -1,22 +1,23 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import strings from "@/strings/en";
+import { useStrings } from "@/lib/i18n";
 
 /**
- * Header — optional top bar showing the current page title.
- * Used on mobile when the sidebar is hidden.
+ * Header — mobile top bar showing current page title.
  */
-const pageTitles: Record<string, string> = {
-  "/": strings.nav.home,
-  "/profile": strings.nav.profile,
-  "/topics": strings.nav.topics,
-  "/plan": strings.nav.plan,
-  "/analyze": strings.nav.analyze,
-};
-
 export default function Header() {
   const pathname = usePathname();
+  const strings = useStrings();
+
+  const pageTitles: Record<string, string> = {
+    "/": strings.nav.home,
+    "/profile": strings.nav.profile,
+    "/topics": strings.nav.topics,
+    "/plan": strings.nav.plan,
+    "/analyze": strings.nav.analyze,
+  };
+
   const title = pageTitles[pathname] || strings.app.title;
 
   return (

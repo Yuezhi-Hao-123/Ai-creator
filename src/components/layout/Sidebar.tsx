@@ -2,23 +2,24 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import strings from "@/strings/en";
+import { useStrings, useLocale } from "@/lib/i18n";
 
 /**
  * Sidebar — desktop navigation (240px fixed width).
- * Highlights the current page with indigo background.
- * Mobile: hidden (replaced by bottom tab bar in AppShell).
+ * Includes language toggle button.
  */
-const navItems = [
-  { href: "/", label: strings.nav.home, icon: "🏠" },
-  { href: "/profile", label: strings.nav.profile, icon: "👤" },
-  { href: "/topics", label: strings.nav.topics, icon: "💡" },
-  { href: "/plan", label: strings.nav.plan, icon: "📋" },
-  { href: "/analyze", label: strings.nav.analyze, icon: "📊" },
-];
-
 export default function Sidebar() {
   const pathname = usePathname();
+  const strings = useStrings();
+  const { locale, toggleLocale } = useLocale();
+
+  const navItems = [
+    { href: "/", label: strings.nav.home, icon: "🏠" },
+    { href: "/profile", label: strings.nav.profile, icon: "👤" },
+    { href: "/topics", label: strings.nav.topics, icon: "💡" },
+    { href: "/plan", label: strings.nav.plan, icon: "📋" },
+    { href: "/analyze", label: strings.nav.analyze, icon: "📊" },
+  ];
 
   return (
     <aside className="hidden md:flex md:flex-col md:w-60 md:min-h-screen bg-[var(--color-surface)] border-r border-[var(--color-border)] px-4 py-6">
@@ -58,6 +59,16 @@ export default function Sidebar() {
           );
         })}
       </nav>
+
+      {/* Language toggle */}
+      <div className="px-3 mb-3">
+        <button
+          onClick={toggleLocale}
+          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-[var(--radius-button)] text-sm font-medium text-[var(--color-muted)] hover:text-[var(--color-foreground)] hover:bg-gray-100 transition-colors cursor-pointer border border-[var(--color-border)]"
+        >
+          🌐 {locale === "en" ? "中文" : "English"}
+        </button>
+      </div>
 
       {/* Footer */}
       <div className="px-3 pt-4 border-t border-[var(--color-border)]">
