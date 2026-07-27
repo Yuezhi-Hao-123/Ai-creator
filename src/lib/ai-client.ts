@@ -1,5 +1,5 @@
 /**
- * AIClient — DeepSeek API call wrapper.
+ * AIClient — calls AI API with configurable model.
  * SERVER-SIDE ONLY. Never import this in client components.
  */
 
@@ -12,18 +12,21 @@ const DEEPSEEK_BASE = "https://api.deepseek.com/v1/chat/completions";
 
 /**
  * Calls the DeepSeek API and returns the raw response text.
- * Throws descriptive errors for common failure modes.
+ * @param model — model ID to use (e.g. "deepseek-chat", "deepseek-v4-pro")
  */
-export async function callDeepSeek(messages: ChatMessage[]): Promise<string> {
+export async function callDeepSeek(
+  messages: ChatMessage[],
+  model?: string
+): Promise<string> {
   const apiKey = process.env.DEEPSEEK_API_KEY;
-  const model = process.env.DEEPSEEK_MODEL || "deepseek-chat";
+  const effectiveModel = model || process.env.DEEPSEEK_MODEL || "deepseek-chat";
 
   if (!apiKey || apiKey === "your_deepseek_api_key_here") {
     throw new Error("DEEPSEEK_API_KEY is not configured.");
   }
 
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 30_000);
+  const timeout = setTimeout(() => controller.abort(), 60_000);
 
   try {
     const response = await fetch(DEEPSEEK_BASE, {
@@ -33,7 +36,7 @@ export async function callDeepSeek(messages: ChatMessage[]): Promise<string> {
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify({
-        model,
+        model: effectiveModel,
         messages,
         temperature: 0.8,
         max_tokens: 2048,
@@ -43,15 +46,9 @@ export async function callDeepSeek(messages: ChatMessage[]): Promise<string> {
 
     if (!response.ok) {
       const status = response.status;
-      if (status === 401) {
-        throw new Error("DeepSeek API key is invalid.");
-      }
-      if (status === 429) {
-        throw new Error("Too many requests. Please wait a moment and try again.");
-      }
-      if (status >= 500) {
-        throw new Error("AI service is temporarily unavailable. Please try again later.");
-      }
+      if (status === 401) throw new Error("DeepSeek API key is invalid.");
+      if (status === 429) throw new Error("Too many requests. Please wait.");
+      if (status >= 500) throw new Error("AI service is temporarily unavailable.");
       throw new Error(`DeepSeek API returned status ${status}.`);
     }
 
@@ -60,18 +57,15 @@ export async function callDeepSeek(messages: ChatMessage[]): Promise<string> {
     };
 
     const content = data.choices?.[0]?.message?.content;
-    if (!content) {
-      throw new Error("AI returned an empty response. Please try again.");
-    }
+    if (!content) throw new Error("AI returned an empty response.");
 
     return content;
   } catch (err) {
     if (err instanceof DOMException && err.name === "AbortError") {
       throw new Error("AI request timed out. Please try again.");
     }
-    // Re-throw known errors
     if (err instanceof Error) throw err;
-    throw new Error("An unexpected error occurred while calling AI.");
+    throw new Error("An unexpected error occurred.");
   } finally {
     clearTimeout(timeout);
   }

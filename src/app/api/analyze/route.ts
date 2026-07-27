@@ -16,6 +16,7 @@ export async function POST(request: NextRequest) {
       metrics?: unknown;
       video_topic?: string;
       profile_id?: string;
+      model?: string;
     };
 
     // Validate metrics
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
     );
 
     // Call AI
-    const raw = await callDeepSeek(messages);
+    const raw = await callDeepSeek(messages, body.model);
 
     // Parse AI suggestions
     const parsed = parseJSONResponse(

@@ -9,11 +9,13 @@ import { TopicCardSkeleton } from "@/components/ui/Skeleton";
 import { getProfile } from "@/lib/storage";
 import { getDeviceId } from "@/lib/device-id";
 import { useStrings } from "@/lib/i18n";
+import { useModel } from "@/lib/model";
 import type { TopicIdea, TopicGenerationResult } from "@/lib/types";
 
 export default function TopicsPage() {
   const router = useRouter();
   const strings = useStrings();
+  const { model } = useModel();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<TopicGenerationResult | null>(null);
@@ -34,7 +36,7 @@ export default function TopicsPage() {
       const response = await fetch("/api/topics", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ topic, device_id: deviceId }),
+        body: JSON.stringify({ topic, device_id: deviceId, model }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || strings.errors.unknown);

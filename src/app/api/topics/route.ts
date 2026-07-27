@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       topic?: string;
       device_id?: string;
+      model?: string;
     };
 
     // Validate
@@ -55,7 +56,7 @@ export async function POST(request: NextRequest) {
     const messages = buildTopicPrompt(body.topic.trim(), profile);
 
     // Call AI
-    const raw = await callDeepSeek(messages);
+    const raw = await callDeepSeek(messages, body.model);
 
     // Parse + validate
     const result = parseJSONResponse(raw, TopicGenerationResultSchema);

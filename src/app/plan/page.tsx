@@ -9,10 +9,12 @@ import Input from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { getDeviceId } from "@/lib/device-id";
 import { useStrings } from "@/lib/i18n";
+import { useModel } from "@/lib/model";
 import type { TopicIdea, ContentPlanResult } from "@/lib/types";
 
 export default function PlanPage() {
   const strings = useStrings();
+  const { model } = useModel();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<ContentPlanResult | null>(null);
@@ -28,7 +30,7 @@ export default function PlanPage() {
       const response = await fetch("/api/plan", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selected_topic: idea, device_id: deviceIdRef.current || undefined }),
+        body: JSON.stringify({ selected_topic: idea, device_id: deviceIdRef.current || undefined, model }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || strings.errors.unknown);
@@ -36,7 +38,7 @@ export default function PlanPage() {
     } catch (err) {
       setError(err instanceof Error ? err.message : strings.errors.unknown);
     } finally { setLoading(false); }
-  }, [strings]);
+  }, [strings, model]);
 
   useEffect(() => {
     try { deviceIdRef.current = getDeviceId(); } catch { /* ignore */ }

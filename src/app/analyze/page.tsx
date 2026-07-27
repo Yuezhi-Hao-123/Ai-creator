@@ -6,10 +6,12 @@ import AnalysisResult from "@/components/analyze/AnalysisResult";
 import EmptyState from "@/components/ui/EmptyState";
 import { TopicCardSkeleton } from "@/components/ui/Skeleton";
 import { useStrings } from "@/lib/i18n";
+import { useModel } from "@/lib/model";
 import type { VideoMetrics, AnalysisResult as AnalysisResultType } from "@/lib/types";
 
 export default function AnalyzePage() {
   const strings = useStrings();
+  const { model } = useModel();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [result, setResult] = useState<AnalysisResultType | null>(null);
@@ -20,7 +22,7 @@ export default function AnalyzePage() {
       const response = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ metrics, video_topic: videoTopic || undefined }),
+        body: JSON.stringify({ metrics, video_topic: videoTopic || undefined, model }),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || strings.errors.unknown);

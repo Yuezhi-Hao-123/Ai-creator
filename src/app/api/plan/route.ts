@@ -15,6 +15,7 @@ export async function POST(request: NextRequest) {
     const body = (await request.json()) as {
       selected_topic?: unknown;
       device_id?: string;
+      model?: string;
     };
 
     // Validate selected_topic
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
     const messages = buildPlanPrompt(topicResult.data, profile);
 
     // Call AI
-    const raw = await callDeepSeek(messages);
+    const raw = await callDeepSeek(messages, body.model);
 
     // Parse + validate
     const result = parseJSONResponse(raw, ContentPlanResultSchema);
