@@ -1,9 +1,8 @@
-import EmptyState from "@/components/ui/EmptyState";
+import ProfileForm from "@/components/profile/ProfileForm";
 import strings from "@/strings/en";
 
 /**
- * Creator Profile page — Stage 2 placeholder.
- * Full form will be added in Stage 3.
+ * Creator Profile page — full form with Supabase integration.
  */
 export default function ProfilePage() {
   return (
@@ -11,13 +10,11 @@ export default function ProfilePage() {
       <h1 className="text-2xl font-semibold tracking-tight text-[var(--color-foreground)]">
         {strings.profile.title}
       </h1>
-      <p className="mt-1 text-sm text-[var(--color-muted)]">
+      <p className="mt-1 mb-6 text-sm text-[var(--color-muted)]">
         {strings.profile.description}
       </p>
-      <EmptyState
-        title={strings.profile.emptyTitle}
-        description={strings.profile.emptyDescription}
-      />
+
+      <ProfileForm />
     </div>
   );
 }
